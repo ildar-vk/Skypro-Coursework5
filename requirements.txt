@@ -10,3 +10,4 @@ requests==2.31.0
 Pillow==10.3.0
 psycopg2-binary==2.9.9
 flake8==7.0.0
+djangorestframework-simplejwt==5.3.1
