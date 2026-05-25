@@ -1,4 +1,5 @@
-import os
+from datetime import timedelta
+
 from pathlib import Path
 from decouple import config
 
@@ -131,7 +132,6 @@ SWAGGER_SETTINGS = {
 }
 
 # JWT
-from datetime import timedelta
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
