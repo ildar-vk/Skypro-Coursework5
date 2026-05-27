@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'drf_yasg',
+    'drf_spectacular',
     'django_celery_beat',
     'users',
     'habits',
@@ -137,4 +137,12 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# DRF Spectacular
+REST_FRAMEWORK['DEFAULT_SCHEMA_CLASS'] = 'drf_spectacular.openapi.AutoSchema'
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Atomic Habits Tracker API',
+    'DESCRIPTION': 'Трекер полезных привычек по книге Джеймса Клира',
+    'VERSION': 'v1',
 }
