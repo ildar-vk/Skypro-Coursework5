@@ -146,3 +146,4 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Трекер полезных привычек по книге Джеймса Клира',
     'VERSION': 'v1',
 }
+STATIC_ROOT = BASE_DIR / 'staticfiles'
