@@ -2,7 +2,7 @@ name: Deploy to Server
 
 on:
   push:
-    branches: [develop, feature/task7]
+    branches: [develop, feature/task6]
 
 jobs:
   test:
@@ -63,7 +63,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/atomic_habits
-            git pull origin feature/task7
+            git pull origin feature/task6
             source venv/bin/activate
             pip install -r requirements.txt
             python manage.py migrate
