@@ -1,0 +1,72 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [develop, feature/task6]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: atomic_habits
+          POSTGRES_USER: django_user
+          POSTGRES_PASSWORD: django_password
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install djangorestframework-simplejwt==5.3.1 drf-spectacular setuptools
+      - name: Run tests
+        env:
+          SECRET_KEY: test-key
+          DB_NAME: atomic_habits
+          DB_USER: django_user
+          DB_PASSWORD: django_password
+          DB_HOST: localhost
+          DB_PORT: 5432
+          CELERY_BROKER_URL: redis://localhost:6379/0
+        run: python manage.py test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install flake8
+      - run: flake8 . --count --max-line-length=120 --exclude=migrations,venv,__pycache__
+
+  deploy:
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/atomic_habits
+            git pull origin feature/task6
+            source venv/bin/activate
+            pip install -r requirements.txt
+            python manage.py migrate
+            python manage.py collectstatic --noinput
+            systemctl restart gunicorn
+            systemctl restart celery celerybeat
