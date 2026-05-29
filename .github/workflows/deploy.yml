@@ -50,8 +50,16 @@ jobs:
       - run: pip install flake8
       - run: flake8 . --count --max-line-length=120 --exclude=migrations,venv,__pycache__
 
-  deploy:
+  build:
     needs: [test, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker images
+        run: docker compose -f docker-compose.prod.yml build
+
+  deploy:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,9 +72,7 @@ jobs:
           script: |
             cd /opt/atomic_habits
             git pull origin feature/task6
-            source venv/bin/activate
-            pip install -r requirements.txt
-            python manage.py migrate
-            python manage.py collectstatic --noinput
-            systemctl restart gunicorn
-            systemctl restart celery celerybeat
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d --build
+            docker compose -f docker-compose.prod.yml exec web python manage.py migrate
+            docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
